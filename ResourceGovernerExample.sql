@@ -1,15 +1,15 @@
 USE [master]
 GO
 RESTORE DATABASE [RevoTestDB] FROM DISK=N'D:\R\RevoTestDB.bak'; -- Restores to C:\Program Files\Microsoft SQL Server\MSSQL13.SQLSERVER2016RC3\MSSQL\Data
-GO																-- (might need symlink to real data store)
+GO                                                              -- (might need symlink to real data store)
 
 USE [RevoTestDB]
 GO
 
 -- TEST Query => 1
 EXECUTE sp_execute_external_script
-		@language=N'R',
-		@script=N'
+        @language=N'R',
+        @script=N'
 library(RevoScaleR)
 f <- formula(as.numeric(ArrDelay) ~ as.numeric(DayOfWeek) + CRSDepTime)
 s <- system.time(mod <- rxLinMod(formula = f, data = AirLine))
@@ -20,7 +20,7 @@ OutputDataSet <-  data.frame(system_time = s[3]);
 -- WITH RESULT SETS UNDEFINED
 WITH RESULT SETS 
 ((
-	Elapsed_time FLOAT
+    Elapsed_time FLOAT
 ));
 
 -- Running Time: 00:00:02
@@ -72,9 +72,9 @@ USE [RevoTestDB]
 GO
 
 -- TEST Query => 2: performance with governor
-EXECUTE  sp_execute_external_script
-        @language = N'R',
-        @script = N'
+EXECUTE sp_execute_external_script
+        @language=N'R',
+        @script=N'
 library(RevoScaleR)
 f <- formula(as.numeric(ArrDelay) ~ as.numeric(DayOfWeek) + CRSDepTime)
 s <- system.time(mod <- rxLinMod(formula = f, data = AirLine))
@@ -85,7 +85,7 @@ OutputDataSet <-  data.frame(system_time = s[3]);
 -- WITH RESULT SETS UNDEFINED
 WITH RESULT SETS 
 ((
-        Elapsed_time FLOAT
+    Elapsed_time FLOAT
 ));
 
 -- Running Time: 00:00:20
@@ -110,9 +110,9 @@ USE [RevoTestDB]
 GO
 
 -- TEST Query => 3: with resource governor disabled
-EXECUTE  sp_execute_external_script
-        @language = N'R',
-        @script = N'
+EXECUTE sp_execute_external_script
+        @language=N'R',
+        @script=N'
 library(RevoScaleR)
 f <- formula(as.numeric(ArrDelay) ~ as.numeric(DayOfWeek) + CRSDepTime)
 s <- system.time(mod <- rxLinMod(formula = f, data = AirLine))
@@ -123,7 +123,7 @@ OutputDataSet <-  data.frame(system_time = s[3]);
 -- WITH RESULT SETS UNDEFINED
 WITH RESULT SETS 
 ((
-        Elapsed_time FLOAT
+    Elapsed_time FLOAT
 ));
 
 -- Running Time: 00:00:02
