@@ -45,6 +45,26 @@ GO
 
 USE [SQLR]
 GO
+-- Confirm user 'R' exists, by listing db users in SQLR
+SELECT  
+    [UserName] = CASE memberprinc.[type] 
+                    WHEN 'S' THEN memberprinc.[name]
+                 END,
+    [UserType] = CASE memberprinc.[type]
+                    WHEN 'S' THEN 'SQL User'
+                    WHEN 'U' THEN 'Windows User'
+                 END, 
+    [DatabaseUserName] = memberprinc.[name],   
+    [Role] = roleprinc.[name]
+FROM    
+    --Role/member associations
+    sys.database_role_members members
+JOIN
+    --Roles
+    sys.database_principals roleprinc ON roleprinc.[principal_id] = members.[role_principal_id]
+JOIN
+    --Role members (database users)
+    sys.database_principals memberprinc ON memberprinc.[principal_id] = members.[member_principal_id];
 EXECUTE AS USER='R';
 GO
 
@@ -55,7 +75,7 @@ EXEC sp_execute_external_script
 WITH RESULT SETS
 ((
 	Res INT
-))
+));
 
 REVERT;
 GO

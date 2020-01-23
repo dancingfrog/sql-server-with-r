@@ -1,18 +1,16 @@
 SELECT * FROM sys.spatial_reference_systems;
 GO
 
-SELECT spatial_reference_id as SRID, well_known_text FROM sys.spatial_reference_systems ORDER BY SRID;
-GO
-
-USE SQLR;
+SELECT spatial_reference_id as SRID, unit_of_measure, well_known_text
+FROM sys.spatial_reference_systems ORDER BY SRID;
 GO
 
 select geometry::Parse('POINT(90 100)');
 select geometry::Parse('POINT(90 100)').ToString();
 GO
 
-select geography::Point(90, 100, 0); -- SRID 0 declares these coordinates to have no relation to any spatial reference system...
--- ... but this is an error:
+select geometry::Point(90, 100, 0);  -- For the geometry type, SRID = 0 declares these coordinates to have no relation to any spatial reference system...
+select geography::Point(90, 100, 0); -- ... but for geography, this is an error:
 -- A .NET Framework error occurred during execution of user-defined routine or aggregate "geography": 
 -- System.ArgumentException: 24204: The spatial reference identifier (SRID) is not valid. The specified SRID must match one of the supported SRIDs displayed in the sys.spatial_reference_systems catalog view.
 -- System.ArgumentException: 
@@ -26,12 +24,15 @@ select geography::Point(51, 1, 4326);
 select geography::Point(51, 1, 4326).ToString();
 GO
 
-create table geopoints (
-	location geography
-);
-insert into geopoints values
-	(geography::Point(51, 1, 4326));
+USE [SQLR]
 GO
+
+--create table geopoints (
+--	location geography
+--);
+--insert into geopoints values
+--	(geography::Point(51, 1, 4326));
+--GO
 
 select * from geopoints;
 GO
@@ -57,5 +58,20 @@ GO
 update geopoints set location.STSrid = 4269;
 GO
 
-select location.Lat as Latitude, location.Long as Longitude, location.STSrid as SRID, location.ToString() as WKT from geopoints;
+select 
+	location.Lat as Latitude, 
+	location.Long as Longitude, 
+	location.STSrid as SRID, 
+	location.ToString() as WKT 
+	from geopoints;
+GO
+
+DECLARE @point geography = geography::Point(3, 4, 4326);
+SELECT @point;
+SELECT @point.ToString();
+SELECT @point.STBuffer(5).ToString();
+SELECT @point.STBuffer(5).STArea();
+SELECT unit_of_measure
+	FROM sys.spatial_reference_systems
+	WHERE authorized_spatial_reference_id = @point.STSrid;
 GO
