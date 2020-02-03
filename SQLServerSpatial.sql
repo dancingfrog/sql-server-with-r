@@ -66,9 +66,10 @@ select
 	from geopoints;
 GO
 
-DECLARE @point geography = geography::Point(3, 4, 4326);
-SELECT @point;
-SELECT @point.ToString();
+DECLARE @point geography = geography::Point(43.649210, -72.318590, 4326); -- SQL Server Point() takes LAT, then LONG (then SRID)... reverse of OGC WKT spec
+SELECT @point.ToString(); -- ToString() displays WKT_TYPE(LONG LAT [,...])
+SELECT @point.STAsText(); -- OGC Methods display WKT_TYPE(LONG LAT [,...])
+SELECT @point.Lat as Latitude, @point.Long as Longitude;
 SELECT @point.STBuffer(5).ToString();
 SELECT @point.STBuffer(5).STArea();
 SELECT unit_of_measure
