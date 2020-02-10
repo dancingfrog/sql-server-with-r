@@ -1,0 +1,44 @@
+---
+title: "RSQLServer"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Importing SQL Server data into R
+
+Load the RODBC package:
+```{r RODBC}
+library(RODBC)
+```
+
+Define the connection:
+```{r connection}
+connStr <- "Driver=SQL Server;Server=WIN-VHQQULMEB4K;Database=WideWorldImporters;trusted_connection=true"
+dbHandle <- odbcDriverConnect(connStr)
+```
+
+Define the query
+```{r query}
+order_query <- "select top 100 DATEFROMPARTS(YEAR(o.[OrderDate]), MONTH(o.[OrderDate]), 1) As OrderMonth,
+  sp.[PreferredName] as SalesPerson,
+  COUNT(distinct o.[OrderId]) as OrderCount,
+  SUM(ol.[Quantity] * ol.[UnitPrice]) as TotalAmount
+	from [Sales].[Orders] o
+	  inner join [Sales].[OrderLines] ol
+	    on ol.[OrderId] = o.[OrderId]
+	  inner join [Application].[People] sp
+	    on sp.[PersonId] = o.[SalespersonPersonId]
+	where sp.[ValidTo] >= GETDATE()
+	  and o.[OrderDate] between '20150101' and '20151231'
+	group by DATEFROMPARTS(YEAR(o.[OrderDate]), MONTH(o.[OrderDate]), 1), sp.[PreferredName]
+  order by OrderCount DESC;"
+```
+
+Execute the query and store the results
+```{r results}
+orders <- sqlQuery(dbHandle, order_query)
+View(orders)
+```
