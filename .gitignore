@@ -1,4 +1,5 @@
 $RECYCLE.BIN
+*.Rhistory
 *.Rproj
 .Rproj.*
 .vs
@@ -6,3 +7,4 @@ $RECYCLE.BIN
 R_CLIENT
 R_SERVER
 passwd
+.Rproj.user
