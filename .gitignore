@@ -1,6 +1,8 @@
 $RECYCLE.BIN
+*.Rproj
+.Rproj.*
 .vs
 .vscode
 R_CLIENT
 R_SERVER
-.Rproj.user
+passwd

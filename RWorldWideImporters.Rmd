@@ -16,8 +16,25 @@ library(RODBC)
 
 Define the connection:
 ```{r connection}
-connStr <- "Driver=SQL Server;Server=WIN-VHQQULMEB4K;Database=WideWorldImporters;trusted_connection=true"
-dbHandle <- odbcDriverConnect(connStr)
+print(getwd())
+creds <- readLines(file("./passwd"))
+print(creds[1])
+print(creds[2])
+
+# On Windows
+driver <- "Driver=SQL Server"
+# On Linux / Mac OS X:
+#driver <- "Driver={ODBC Driver 17 for SQL Server}"
+
+# Local
+server <- "Server=WIN-VHQQULMEB4K;trusted_connection=true"
+# Remote
+#server <- "Server=ec2-52-21-198-129.compute-1.amazonaws.com"
+
+connStr <- paste(driver, ";", server,";Database=WideWorldImporters;Persist Security Info=True;User ID=", creds[1], ";Password=", creds[2], ";", sep="")
+print(connStr)
+
+dbHandle <- RODBC::odbcDriverConnect(connStr)
 ```
 
 Define the query
@@ -39,6 +56,6 @@ order_query <- "select top 100 DATEFROMPARTS(YEAR(o.[OrderDate]), MONTH(o.[Order
 
 Execute the query and store the results
 ```{r results}
-orders <- sqlQuery(dbHandle, order_query)
+orders <- RODBC::sqlQuery(dbHandle, order_query)
 View(orders)
 ```
