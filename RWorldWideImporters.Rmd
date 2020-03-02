@@ -30,9 +30,9 @@ driver <- "Driver=SQL Server"
 # Local
 server <- "Server=WIN-VHQQULMEB4K;trusted_connection=true"
 # Remote
-#server <- "Server=ec2-52-21-198-129.compute-1.amazonaws.com"
+#server <- "Server=ec2-52-21-198-129.compute-1.amazonaws.com;trusted_connection=false"
 
-connStr <- paste(driver, ";", server,";Database=WideWorldImporters;Persist Security Info=True;User ID=", creds[1], ";Password=", creds[2], ";", sep="")
+connStr <- paste(driver, ";", server,";Database=WideWorldImporters;Persist Security Info=True;User ID=", creds[1], ";{Password=", creds[2], "};", sep="")
 print(connStr)
 
 dbHandle <- RODBC::odbcDriverConnect(connStr)
@@ -60,4 +60,24 @@ Execute the query and store the results
 orders <- RODBC::sqlQuery(dbHandle, order_query)
 View(orders)
 str(orders)
+```
+
+```{r r_data_munging}
+tail(orders)
+new_orders <- data.frame(
+  OrderMonth = c("2019-12-01", "2020-03-01"),
+  SalesPerson = c("Julie", "Tomaz"),
+  OrderCount = c(201, 2221),
+  TotalAmount = c(340000, 370000)
+)
+tail(rbind(orders, new_orders)) # creates new data.frame
+```
+```{r dplyr_data_munging}
+if (!require("dplyr")) {
+  install.packages("dplyr")
+  library("dplyr")
+}
+orders_with_new <- dplyr::bind_rows(orders, new_orders)
+tail(orders)
+tail(orders_with_new)
 ```
