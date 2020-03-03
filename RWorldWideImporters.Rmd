@@ -34,9 +34,9 @@ driver <- "Driver={ODBC Driver 17 for SQL Server}"
 # Local
 # server <- "Server=WIN-VHQQULMEB4K;trusted_connection=true"
 # Remote
-server <- "Server=ec2-52-21-198-129.compute-1.amazonaws.com;Trusted_Connection=no"
+server <- paste0("Server=ec2-52-21-198-129.compute-1.amazonaws.com;Trusted_Connection=no;UID=", creds[1], ";PWD=", creds[2])
 
-connStr <- paste0(driver, ";", server, ";Database=WideWorldImporters;Persist Security Info=True;UID=", creds[1], ";PWD=", creds[2], ";")
+connStr <- paste0(driver, ";", server, ";Database=WideWorldImporters;{Persist Security Info=True};")
 print(connStr)
 
 dbHandle <- RODBC::odbcDriverConnect(connStr)
@@ -69,7 +69,7 @@ str(orders)
 ```{r r_data_munging}
 tail(orders)
 new_orders <- data.frame(
-  OrderMonth = c("2019-12-01", "2020-03-01"),
+  OrderMonth = c(as.Date("2019-12-01"), as.Date("2020-03-01")),
   SalesPerson = c("Julie", "Tomaz"),
   OrderCount = c(201, 2221),
   TotalAmount = c(340000, 370000)
@@ -81,7 +81,9 @@ if (!require("dplyr")) {
   install.packages("dplyr")
   library("dplyr")
 }
+
 orders_with_new <- dplyr::bind_rows(orders, new_orders)
+names(orders_with_new)
 tail(orders)
 tail(orders_with_new)
 ```
