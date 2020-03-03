@@ -22,9 +22,11 @@ print(grepl("sql-server-with-r", getwd(), fixed=TRUE))
 if (!grepl("sql-server-with-r", getwd(), fixed=TRUE)) {
   setwd(paste0(getwd(),"/sql-server-with-r"))
 }
-creds <- readLines(file("./passwd"))
+cred_file <- file("./passwd")
+creds <- readLines(cred_file)
 print(creds[1])
 print(creds[2])
+close(cred_file)
 
 # On Windows
 #driver <- "Driver=SQL Server"
@@ -70,20 +72,61 @@ str(orders)
 tail(orders)
 new_orders <- data.frame(
   OrderMonth = c(as.Date("2019-12-01"), as.Date("2020-03-01")),
-  SalesPerson = c("Julie", "Tomaz"),
+  SalesPerson = c(as.character("Julie"), as.character("Tomaz")),
   OrderCount = c(201, 2221),
   TotalAmount = c(340000, 370000)
 )
 tail(rbind(orders, new_orders)) # creates new data.frame
+
+orders_discount <- data.frame(
+    Discount = orders$TotalAmount * 0.25
+)
+orders_with_discount <- cbind(orders, orders_discount)
+
+print(names(orders_with_discount))
 ```
+
 ```{r dplyr_data_munging}
 if (!require("dplyr")) {
   install.packages("dplyr")
   library("dplyr")
 }
 
-orders_with_new <- dplyr::bind_rows(orders, new_orders)
-names(orders_with_new)
-tail(orders)
-tail(orders_with_new)
+tail(dplyr::bind_rows(orders, new_orders))
+
+orders_sequence <- data.frame(
+    RowID = seq(1:nrow(orders))
+)
+orders_in_sequence <- dplyr::bind_cols(orders_sequence, orders_with_discount)
+
+orders_tax <- data.frame(
+    SalesTax = orders$TotalAmount * 0.08
+)
+orders_with_tax_and_discount <- dplyr::bind_cols(orders_in_sequence, data.frame(orders_tax))
+tail(orders_with_tax_and_discount)
+
+orders_checkout_total <- dplyr::mutate(
+    orders_with_tax_and_discount, 
+    CheckoutTotal = orders_with_tax_and_discount$TotalAmount - orders_with_tax_and_discount$Discount + orders_with_tax_and_discount$SalesTax
+)
+tail(orders_checkout_total)
+```
+
+```{r data_columns}
+names(orders)
+names(orders_with_discount)
+names(orders_with_tax_and_discount)
+names(orders_checkout_total)
+```
+
+```{r data_grep}
+order_sales_A <- grep("^A.*", orders$SalesPerson)
+orders_checkout_total[order_sales_A,]
+View(orders_checkout_total[order_sales_A,])
+```
+
+```{r dplyr_data_selection}
+View(dplyr::select(orders, matches("Order")))
+View(dplyr::select(orders, c(-OrderCount, -TotalAmount)))
+View(dplyr::select(orders_with_tax_and_discount, -RowID))
 ```
