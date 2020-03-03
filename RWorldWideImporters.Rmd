@@ -18,21 +18,25 @@ options(warn = -1)
 Define the connection:
 ```{r connection}
 print(getwd())
+print(grepl("sql-server-with-r", getwd(), fixed=TRUE))
+if (!grepl("sql-server-with-r", getwd(), fixed=TRUE)) {
+  setwd(paste0(getwd(),"/sql-server-with-r"))
+}
 creds <- readLines(file("./passwd"))
 print(creds[1])
 print(creds[2])
 
 # On Windows
-driver <- "Driver=SQL Server"
+#driver <- "Driver=SQL Server"
 # On Linux / Mac OS X:
-#driver <- "Driver={ODBC Driver 17 for SQL Server}"
+driver <- "Driver={ODBC Driver 17 for SQL Server}"
 
 # Local
-server <- "Server=WIN-VHQQULMEB4K;trusted_connection=true"
+# server <- "Server=WIN-VHQQULMEB4K;trusted_connection=true"
 # Remote
-#server <- "Server=ec2-52-21-198-129.compute-1.amazonaws.com;trusted_connection=false"
+server <- "Server=ec2-52-21-198-129.compute-1.amazonaws.com;Trusted_Connection=no"
 
-connStr <- paste(driver, ";", server,";Database=WideWorldImporters;Persist Security Info=True;User ID=", creds[1], ";{Password=", creds[2], "};", sep="")
+connStr <- paste0(driver, ";", server, ";Database=WideWorldImporters;Persist Security Info=True;UID=", creds[1], ";PWD=", creds[2], ";")
 print(connStr)
 
 dbHandle <- RODBC::odbcDriverConnect(connStr)
