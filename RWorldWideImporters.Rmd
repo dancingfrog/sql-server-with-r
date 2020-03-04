@@ -5,6 +5,9 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+# On AWS, set timezone for the R enviroment
+#Sys.setenv(TZ="GMT")
 ```
 
 ## Importing SQL Server data into R
@@ -18,8 +21,8 @@ options(warn = -1)
 Define the connection:
 ```{r connection}
 print(getwd())
-print(grepl("sql-server-with-r", getwd(), fixed=TRUE))
-if (!grepl("sql-server-with-r", getwd(), fixed=TRUE)) {
+print(grepl("r", getwd(), ignore.case=TRUE))
+if (!grepl("r", getwd(), ignore.case=TRUE)) {
   setwd(paste0(getwd(),"/sql-server-with-r"))
 }
 cred_file <- file("./passwd")
@@ -34,7 +37,7 @@ close(cred_file)
 driver <- "Driver={ODBC Driver 17 for SQL Server}"
 
 # Local
-# server <- "Server=WIN-VHQQULMEB4K;trusted_connection=true"
+#server <- "Server=WIN-VHQQULMEB4K;trusted_connection=true"
 # Remote
 server <- paste0("Server=ec2-52-21-198-129.compute-1.amazonaws.com;Trusted_Connection=no;UID=", creds[1], ";PWD=", creds[2])
 
@@ -68,7 +71,18 @@ View(orders)
 str(orders)
 ```
 
+First thing we need to do is convert the OrderMonth (: Factor) column to a real R date, then do some additional data munging, using native R functions:
 ```{r r_data_munging}
+# Create new OrderMonth (: Date) column
+order_dates <- data.frame(
+  OrderMonth = as.Date(orders$OrderMonth)
+)
+# Bind OrderMonth (: Date) column to subset of orders, where original OrderMonth column has been removed
+orders <- cbind(order_dates, orders[, !names(orders) == "OrderMonth"]) 
+#orders <- cbind(order_dates, subset(orders, select = c(SalesPerson, OrderCount, TotalAmount)))
+
+str(orders)
+
 tail(orders)
 new_orders <- data.frame(
   OrderMonth = c(as.Date("2019-12-01"), as.Date("2020-03-01")),
@@ -76,6 +90,7 @@ new_orders <- data.frame(
   OrderCount = c(201, 2221),
   TotalAmount = c(340000, 370000)
 )
+
 tail(rbind(orders, new_orders)) # creates new data.frame
 
 orders_discount <- data.frame(
@@ -86,6 +101,7 @@ orders_with_discount <- cbind(orders, orders_discount)
 print(names(orders_with_discount))
 ```
 
+The dplyr package makes many of these data munging tasks easier:
 ```{r dplyr_data_munging}
 if (!require("dplyr")) {
   install.packages("dplyr")
@@ -118,15 +134,18 @@ names(orders_with_discount)
 names(orders_with_tax_and_discount)
 names(orders_checkout_total)
 ```
-
-```{r data_grep}
+```{r data_filter_grep}
 order_sales_A <- grep("^A.*", orders$SalesPerson)
-orders_checkout_total[order_sales_A,]
-View(orders_checkout_total[order_sales_A,])
+head(orders_checkout_total[order_sales_A,])
+```
+
+```{r dplyr_data_filter_grep}
+head(dplyr::filter(orders_checkout_total, grepl("^A.*", SalesPerson)))
+print(orders_checkout_total[order_sales_A,] == dplyr::filter(orders_checkout_total, grepl("^A.*", SalesPerson)))
 ```
 
 ```{r dplyr_data_selection}
-View(dplyr::select(orders, matches("Order")))
-View(dplyr::select(orders, c(-OrderCount, -TotalAmount)))
-View(dplyr::select(orders_with_tax_and_discount, -RowID))
+head(dplyr::select(orders, matches("Order")))
+head(dplyr::select(orders, c(-OrderCount, -TotalAmount)))
+head(dplyr::select(orders_with_tax_and_discount, -RowID))
 ```
