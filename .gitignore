@@ -1,4 +1,5 @@
 $RECYCLE.BIN
+*.RData
 *.Rhistory
 *.Rproj
 .Rproj.*

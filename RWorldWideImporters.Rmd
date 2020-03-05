@@ -20,15 +20,16 @@ options(warn = -1)
 
 Define the connection:
 ```{r connection}
-print(getwd())
-print(grepl("r", getwd(), ignore.case=TRUE))
+#print(grepl("r", getwd(), ignore.case=TRUE))
 if (!grepl("r", getwd(), ignore.case=TRUE)) {
   setwd(paste0(getwd(),"/sql-server-with-r"))
 }
+print(getwd())
+
 cred_file <- file("./passwd")
 creds <- readLines(cred_file)
-print(creds[1])
-print(creds[2])
+#print(creds[1])
+#print(creds[2])
 close(cred_file)
 
 # On Windows
