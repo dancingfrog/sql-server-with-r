@@ -1,11 +1,27 @@
 EXEC sp_configure 'show advanced options', 1;
 GO
-RECONFIGURE;
+RECONFIGURE
 GO
-EXEC sp_configure'external scripts enabled', 1;
+EXEC sp_configure 'external scripts enabled', 1;
 GO
-RECONFIGURE WITH OVERRIDE;
+RECONFIGURE WITH OVERRIDE
 GO
+
+EXEC sp_execute_external_script
+    @language =N'R',
+    @script=N'OutputDataSet<-InputDataSet',
+    @input_data_1 =N'SELECT 1 AS hello'
+WITH RESULT SETS (([Hello World] INT));
+GO
+
+EXEC sp_execute_external_script
+	@language=N'R',
+	@script=N'OutputDataSet <- InputDataSet',
+	@input_data_1=N'SELECT 1 As Numb UNION ALL SELECT 2;'
+WITH RESULT SETS
+((
+	Res INT
+));
 
 EXEC sp_configure 'external scripts enabled';
 GO
@@ -15,7 +31,7 @@ Go
 CREATE DATABASE SQLR;
 GO
 
-CREATE LOGIN [R] WITH PASSWORD=N'learnr', DEFAULT_DATABASE=[SQLR], CHECK_EXPIRATION=ON, CHECK_POLICY=ON
+CREATE LOGIN [R] WITH PASSWORD=N'p@$$W0RD', DEFAULT_DATABASE=[SQLR], CHECK_EXPIRATION=ON, CHECK_POLICY=ON
 GO
 ALTER SERVER ROLE [sysadmin] ADD MEMBER [R]
 GO
@@ -29,7 +45,6 @@ ALTER ROLE [db_datareader] ADD MEMBER [R]
 GO
 
 GRANT EXECUTE ANY EXTERNAL SCRIPT TO [R];
-GO
 GO
 ALTER USER [R] WITH DEFAULT_SCHEMA=[dbo]
 GO
@@ -77,14 +92,15 @@ WITH RESULT SETS
 	Res INT
 ));
 
-REVERT;
-GO
-
-DROP USER R;
-GO
-USE [master];
-GO
-DROP LOGIN R;
-GO
-DROP TABLE IF EXISTS SQLR;
-GO
+-- REVERT;
+-- GO
+-- DROP USER R;
+-- GO
+-- USE [master];
+-- GO
+-- DROP LOGIN R;
+-- GO
+-- DROP TABLE IF EXISTS SQLR;
+-- GO
+-- DROP DATABASE IF EXISTS SQLR;
+-- GO
