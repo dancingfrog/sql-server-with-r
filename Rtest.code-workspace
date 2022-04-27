@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "Rtest"
+		}
+	],
+	"settings": {
+		"git.ignoreLimitWarning": true,
+		"notebook.trustedBooks": [
+			"\\"
+		]
+	}
+}

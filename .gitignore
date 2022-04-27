@@ -1,11 +1,9 @@
-$RECYCLE.BIN
-*.RData
-*.Rhistory
-*.Rproj
-.Rproj.*
-.vs
-.vscode
+*RData
+*Rhistory
+*Rp*
+*vs
+*vscode
+*zip
 R_CLIENT
 R_SERVER
 passwd
-.Rproj.user

@@ -1,3 +1,28 @@
+-- Version of R
+EXECUTE sp_execute_external_script
+    @language = N'R',
+    @script = N'
+OutputDataSet <- as.data.frame(c(lapply(version, function (x) { x } ), path = R.home()));
+'
+    WITH RESULT SETS ((
+        [platform] VARCHAR(MAX),
+        [arch] VARCHAR(MAX),
+        [os] VARCHAR(MAX),
+        [system] VARCHAR(MAX),
+        [status]  VARCHAR(MAX),
+        [major] VARCHAR(MAX),
+        [minor] VARCHAR(MAX),
+        [year] VARCHAR(MAX),
+        [month] VARCHAR(MAX),
+        [day] VARCHAR(MAX),
+        [svn_rev] VARCHAR(MAX),
+        [language] VARCHAR(MAX),
+        [version_string] VARCHAR(MAX),
+        [nickname] VARCHAR(MAX),
+        [path] VARCHAR(MAX)
+        ));
+GO
+
 -- Path to R libraries
 EXECUTE sp_execute_external_script
     @language = N'R',
